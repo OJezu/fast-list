@@ -1,6 +1,7 @@
 ;(function() { // closure for web browsers
 
-function Item (data, prev, next) {
+function Item (data, prev, next, parent) {
+  this.parent = parent;
   this.next = next
   if (next) next.prev = this
   this.prev = prev
@@ -17,9 +18,10 @@ function FastList () {
 
 FastList.prototype =
 { push: function (data) {
-    this._tail = new Item(data, this._tail, null)
+    this._tail = new Item(data, this._tail, null, this)
     if (!this._head) this._head = this._tail
-    this.length ++
+    this.length ++;
+    return this._tail;
   }
 
 , pop: function () {
@@ -36,9 +38,10 @@ FastList.prototype =
   }
 
 , unshift: function (data) {
-    this._head = new Item(data, null, this._head)
+    this._head = new Item(data, null, this._head, this)
     if (!this._tail) this._tail = this._head
-    this.length ++
+    this.length ++;
+    return this._head;
   }
 
 , shift: function () {
@@ -53,14 +56,54 @@ FastList.prototype =
     else if (this.length === 0) this._head = this._tail = null
     return h.data
   }
-
+, remove: function (item) {
+    if (item.parent !== this) throw new Error('Item does not belong to this list');
+    if (item.prev) item.prev.next = item.next;
+    else this._head = item.next;
+    if (item.next) item.next.prev = item.prev;
+    else this._tail = item.prev;
+    item.next = item.prev = item.parent = null;
+    -- this.length;
+    return item.data;
+  }
+, insertBefore: function(item, data){
+    if (item.parent !== this) throw new Error('Item does not belong to this list');
+    var n_item = new Item(data, item.prev, item, this)
+    if(this._head == item) this._head = n_item
+    ++this.length
+    return n_item;
+}
+, insertAfter: function(item, data){
+    if (item.parent !== this) throw new Error('Item does not belong to this list');
+    var n_item = new Item(data, item, item.next, this)
+    if(this._tail == item) this._tail = n_item
+    ++this.length
+    return n_item
+}
 , item: function (n) {
     if (n < 0) n = this.length + n
-    var h = this._head
-    while (n-- > 0 && h) h = h.next
-    return h ? h.data : undefined
+    if ( n < this.length/2) {
+      var h = this._head
+      while (n-- > 0 && h) h = h.next
+      return h ? h.data : undefined
+    } else {
+      var t = this._tail
+      while(++n < this.length && t) t = t.prev
+      return t ? t.data : undefined
+    }
   }
-
+, entry: function (n) {
+    if (n < 0) n = this.length + n
+    if ( n < this.length/2) {
+      var h = this._head
+      while (n-- > 0 && h) h = h.next
+      return h
+    } else {
+      var t = this._tail
+      while(++n < this.length && t) t = t.prev
+      return t
+    }
+  }
 , slice: function (n, m) {
     if (!n) n = 0
     if (!m) m = this.length

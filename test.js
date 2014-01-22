@@ -32,6 +32,8 @@ test(function (t) {
   t.equal(list.item(1), "baz", "item 1 = baz")
   t.equal(list.item(-0), "bar", "item -0 = bar")
   t.equal(list.item(-1), "nop", "item -1 = nop")
+  t.equal(list.item(-5), "jut", "item -5 = jut")
+  t.equal(list.item(10), "jut", "item 10 = jut")
 
   t.equal(list.item(5), "elf", "item 5 = elf")
 
@@ -108,5 +110,74 @@ test(function (t) {
 
   t.end()
 })
+test(function(t){
+	 var list = new FastList()
+  var first = list.push("foo")
+  list.push("bar")
+  list.push("baz")
+  list.push("boo")
+  list.push("asd")
+  list.push("dsa")
+  list.push("elf")
+  list.push("fro")
+  var middle = list.push("gap");
+  var middle2 = list.push("hoo")
+  list.push("ike")
+  list.push("jut")
+  list.push("kni")
+  list.push("lam")
+  list.push("mut")
+  list.push("nop")
+  var last = list.push("orc");
+  
+  t.equal(list.remove(first), "foo", "list.remove(first) == foo");
+  t.equal(list.remove(middle), "gap", "list.remove(gap) == gap");
+  t.equal(list.remove(last), "orc", "list.remove(last) == orc");
+
+  /*checkConsistency(t, list, ['bar', 'baz', 'boo', 'asd', 'dsa', 'elf',
+  'fro', 'hoo', 'ike', 'jut', 'kni', 'lam', 'mut', 'nop']);*/
+  
+  first = list._head;
+  last = list._tail;
+  middle = middle2;
+  
+  b_first = list.insertBefore(first, 'beforeFirst');
+  a_first = list.insertAfter(first, 'afterFirst');
+  
+  b_middle = list.insertBefore(middle, 'beforeMiddle');
+  a_middle = list.insertAfter(middle, 'afterMiddle');
+  
+  b_last = list.insertBefore(last, 'beforeLast');
+  a_last = list.insertAfter(last, 'afterLast');
+  checkConsistency(t, list, ['beforeFirst', 'bar', 'afterFirst',
+  'baz', 'boo', 'asd', 'dsa', 'elf', 'fro', 'beforeMiddle', 'hoo', 'afterMiddle',
+  'ike', 'jut', 'kni', 'lam', 'mut', 'beforeLast', 'nop', 'afterLast']);
+  
+  
+  t.end();
+})
+function checkConsistency(t, list, entries){
+	var prev = null
+	var entry = list._head
+	var total = 0
+	var visited = []
+	var consistent
+	while(entry){
+		if(visited.indexOf(entry) != -1){
+			throw new Error('List became a circle! Entry '+entry.data+' encountered twice');
+		}
+		consistent = true;
+		visited.push(entry);
+		if(entries){
+			consistent = entry.data == entries[total];
+		}
+		consistent == consistent && (entry == list._head || entry.prev && entry.prev.next == entry)
+		consistent == consistent && (entry == list._tail || entry.next && entry.next.prev == entry)
+		t.assert(consistent, 'entry '+entry.data+' is consistent');
+		entry = entry.next;
+		++total;
+	}
+	t.equal(total, list.length, 'entry count equals reported length');
+}
 
 
