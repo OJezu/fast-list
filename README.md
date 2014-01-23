@@ -12,6 +12,10 @@ In cases where it's mixed, a linked list implementation can be
 significantly faster.  See the benchmark scripts in `bench/*.js` to
 measure the differences.
 
+One special case when you really want this package, is when you have a queue
+from which entries can be inserted/removed from any place, that is even from
+the middle. Or you just simply need a list, and you know why.
+
 This lacks a lot of features that arrays have:
 
 1. You can't specify the size at the outset.
@@ -38,23 +42,36 @@ npm install fast-list
 ```javascript
 var FastList = require("fast-list")
 var list = new FastList()
-list.push("foo")
+var foo_entry = list.push("foo")
 list.unshift("bar")
 list.push("baz")
-console.log(list.length) // 2
+list.insertAfter(foo_entry, "far");
+console.log(list.length) // 4
 console.log(list.pop()) // baz
+console.log(list.pop()) // far
+console.log(list.remove(foo_entry)) //foo
 console.log(list.shift()) // bar
-console.log(list.shift()) // foo
 ```
 
 ### Methods
 
-* `push`: Just like Array.push, but only can take a single entry
+* `push`: Just like Array.push, but only can take a single entry,
+  returns pointer needed for some other methods
 * `pop`: Just like Array.pop.  Note: if you're only using push and pop,
   then you have a stack, and Arrays are better for that.
 * `shift`: Just like Array.shift.  Note: if you're only using push and
   shift, then you have a queue, and Arrays are better for that.
 * `unshift`: Just like Array.unshift, but only can take a single entry.
+  returns pointer needed for some other methods
+* `insertBefore(pointer, entry)`: insert a new entry before other entry
+  referenced by `pointer`. `pointer` is a return value of earlier `push`,
+  `unshift`, `insertBefore` or `insertAfter` call.
+* `insertAfter(pointer, entry)`: insert a new entry after other entry
+  referenced by `pointer`. `pointer` is a return value of earlier `push`,
+  `unshift`, `insertBefore` or `insertAfter` call.
+* `remove(pointer)`: remove the entry referenced by `pointer`. `pointer` is a
+  return value of earlier `push`, `unshift`, `insertBefore` or `insertAfter`
+  call.
 * `drop`: Drop all entries
 * `item(n)`: Retrieve the nth item in the list.  This involves a walk
   every time.  It's very slow.  If you find yourself using this,

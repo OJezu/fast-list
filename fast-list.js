@@ -1,7 +1,7 @@
 ;(function() { // closure for web browsers
 
 function Item (data, prev, next, parent) {
-  this.parent = parent;
+  this.parent = parent
   this.next = next
   if (next) next.prev = this
   this.prev = prev
@@ -20,8 +20,8 @@ FastList.prototype =
 { push: function (data) {
     this._tail = new Item(data, this._tail, null, this)
     if (!this._head) this._head = this._tail
-    this.length ++;
-    return this._tail;
+    this.length ++
+    return this._tail
   }
 
 , pop: function () {
@@ -34,14 +34,15 @@ FastList.prototype =
     this.length --
     if (this.length === 1) this._head = this._tail
     else if (this.length === 0) this._head = this._tail = null
+    t.parent = null
     return t.data
   }
 
 , unshift: function (data) {
     this._head = new Item(data, null, this._head, this)
     if (!this._tail) this._tail = this._head
-    this.length ++;
-    return this._head;
+    this.length ++
+    return this._head
   }
 
 , shift: function () {
@@ -54,30 +55,31 @@ FastList.prototype =
     this.length --
     if (this.length === 1) this._tail = this._head
     else if (this.length === 0) this._head = this._tail = null
+    h.parent = null
     return h.data
   }
 , remove: function (item) {
-    if (item.parent !== this) throw new Error('Item does not belong to this list');
-    if (item.prev) item.prev.next = item.next;
-    else this._head = item.next;
-    if (item.next) item.next.prev = item.prev;
-    else this._tail = item.prev;
-    item.next = item.prev = item.parent = null;
-    -- this.length;
-    return item.data;
+    if (item.parent !== this) throw new Error('Item does not belong to this list')
+    if (item.prev) item.prev.next = item.next
+    else this._head = item.next
+    if (item.next) item.next.prev = item.prev
+    else this._tail = item.prev
+    item.next = item.prev = item.parent = null
+    this.length --
+    return item.data
   }
 , insertBefore: function(item, data){
-    if (item.parent !== this) throw new Error('Item does not belong to this list');
+    if (item.parent !== this) throw new Error('Item does not belong to this list')
     var n_item = new Item(data, item.prev, item, this)
     if(this._head == item) this._head = n_item
-    ++this.length
-    return n_item;
+    this.length ++
+    return n_item
 }
 , insertAfter: function(item, data){
-    if (item.parent !== this) throw new Error('Item does not belong to this list');
+    if (item.parent !== this) throw new Error('Item does not belong to this list')
     var n_item = new Item(data, item, item.next, this)
     if(this._tail == item) this._tail = n_item
-    ++this.length
+    this.length ++
     return n_item
 }
 , item: function (n) {
